@@ -363,7 +363,10 @@ flowchart TD
     ValidateBiz -->|Имя/Фамилия| CheckName[Проверка допустимых символов]
     ValidateBiz -->|agreeToTerms| CheckTerms[agreeToTerms == true?]
     
-    CheckEmail & CheckPass & CheckName & CheckTerms --> BizErrors{Есть ошибки?}
+    CheckEmail --> BizErrors{Есть ошибки?}
+    CheckPass --> BizErrors
+    CheckName --> BizErrors
+    CheckTerms --> BizErrors
     
     BizErrors -->|Да| Return400Biz[Ответ 400 с details]
     Return400Biz --> End
@@ -372,23 +375,15 @@ flowchart TD
     
     HashPass --> BeginTx[Начало транзакции БД]
     
-    BeginTx --> CreateUser[Создание записи в users:]
-    CreateUser -->|• userId = UUID| 
-    CreateUser -->|• email = lowercase + trim|
-    CreateUser -->|• password_hash|
-    CreateUser -->|• status = pending_verification|
+    BeginTx --> CreateUser["Создание записи в users:<br/>• userId = UUID<br/>• email = lowercase + trim<br/>• password_hash<br/>• status = pending_verification"]
     
-    CreateUser --> CreateToken[Создание токена подтверждения:]
-    CreateToken -->|• token = crypto_random(32)|
-    CreateToken -->|• expires_at = NOW() + 24h|
+    CreateUser --> CreateToken["Создание токена подтверждения:<br/>• token = crypto_random(32)<br/>• expires_at = NOW() + 24h"]
     
-    CreateToken --> SendEmail[Асинхронная отправка письма]
-    SendEmail -->|Очередь задач: Celery/RabbitMQ|
+    CreateToken --> SendEmail["Асинхронная отправка письма<br/>Очередь задач: Celery/RabbitMQ"]
     
     SendEmail --> CommitTx[Фиксация транзакции]
     
-    CommitTx --> LogEvent[Логирование: user_registered]
-    LogEvent -->|• Без PII: пароль, полный телефон|
+    CommitTx --> LogEvent["Логирование: user_registered<br/>• Без PII: пароль, полный телефон"]
     
     LogEvent --> Return201[Ответ 201: Успех]
     Return201 --> End
@@ -407,27 +402,6 @@ flowchart TD
 
 ---
 
-## 📁 Структура репозитория
-
-```
-📦 business-analysis-tasks/
-├── 📄 README.md                 # Этот файл
-├── 📄 LICENSE                   # Лицензия MIT
-├── 📁 task-1-bpmn/
-│   ├── 📄 process-description.md
-│   └── 📄 bpmn-model.bpmn
-├── 📁 task-2-requirements/
-│   ├── 📄 user-stories.md
-│   └── 📄 use-cases.md
-├── 📁 task-3-api/
-│   ├── 📄 api-spec.yaml
-│   └── 📄 registration-algorithm.md
-└── 📁 docs/
-    ├── 📄 glossary.md
-    └── 📄 assumptions.md
-```
-
----
 
 ## 🚀 Как использовать
 
@@ -451,30 +425,4 @@ npm install -g @redocly/cli
 redocly lint task-3-api/api-spec.yaml
 ```
 
----
 
-## 🤝 Вклад в проект
-
-1. Fork репозитория
-2. Создайте ветку для фичи: `git checkout -b feature/amazing-feature`
-3. Закоммитьте изменения: `git commit -m 'Add: amazing feature'`
-4. Запушьте ветку: `git push origin feature/amazing-feature`
-5. Откройте Pull Request
-
----
-
-## 📄 Лицензия
-
-Распространяется под лицензией **MIT**. Подробнее см. в файле [LICENSE](LICENSE).
-
-> 💬 **Обратная связь**:  
-> Если вы нашли ошибку, неточность или у вас есть предложение по улучшению —  
-> пожалуйста, создайте [Issue](../../issues) или отправьте Pull Request 🙏
-
-<div align="center">
-
-**Сделано с ❤️ для сообщества бизнес-аналитиков**
-
-[⬆ Вернуться к оглавлению](#-оглавление)
-
-</div>
